@@ -1,18 +1,30 @@
 from django.db import models
 
 
-class Player(models.Model):
-    # Tipos de jugadores para filtrar en Android
-    POSITIONS = [('F', 'Fielder'), ('P', 'Pitcher')]
+class Team(models.Model):
+    name = models.CharField(max_length=150)
+    city = models.CharField(max_length=100)
+    coach_name = models.CharField(max_length=100) # Para el caso de uso de Entrenador
 
+    def __str__(self):
+        return self.name
+
+class Player(models.Model):
+    POSITIONS = [('F', 'Fielder'), ('P', 'Pitcher')]
     name = models.CharField(max_length=100)
     number = models.IntegerField()
     position_type = models.CharField(max_length=1, choices=POSITIONS)
+    # Vinculamos al jugador con un equipo
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='players', null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.team.name if self.team else 'Sin equipo'})"
 
 
 class Game(models.Model):
     opponent = models.CharField(max_length=100)
     date = models.DateField()
+    season = models.CharField(max_length=10, default="2026")
     location = models.CharField(max_length=100)
 
 

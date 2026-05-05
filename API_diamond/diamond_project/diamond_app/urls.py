@@ -11,4 +11,8 @@ urlpatterns = [
     # Registro de Estadísticas (Relación N:N)
     path('stats/fielder/', endpoints.fielder_stats_handler),
     path('stats/pitcher/', endpoints.pitcher_stats_handler),
+
+    # Información de los equipos
+    path('teams/', endpoints.teams_handler),
+    path('teams/<int:team_id>/', endpoints.team_detail),
 ]

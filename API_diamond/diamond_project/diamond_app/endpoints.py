@@ -1,7 +1,7 @@
 import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import Player, Game, FielderStat, PitcherStat
+from .models import Player, Game, FielderStat, PitcherStat, Team
 
 
 # --- GESTIÓN DE JUGADORES ---
@@ -138,3 +138,78 @@ def pitcher_stats_handler(request):
             return JsonResponse({"error": str(e)}, status=400)
 
     return JsonResponse({"error": "Método no soportado"}, status=405)
+
+@csrf_exempt
+def teams_handler(request):
+    """
+    GET: Listar todos los equipos.
+    POST: Crear un nuevo equipo.
+    """
+    if request.method == 'GET':
+        teams = Team.objects.all()
+        data = [{
+            "id": t.id,
+            "name": t.name,
+            "city": t.city,
+            "coach": t.coach_name
+        } for t in teams]
+        return JsonResponse(data, safe=False, status=200)
+
+    elif request.method == 'POST':
+        body = json.loads(request.body)
+        new_team = Team.objects.create(
+            name=body['name'],
+            city=body['city'],
+            coach_name=body['coach']
+        )
+        return JsonResponse({"id": new_team.id, "message": "Equipo creado"}, status=201)
+
+@csrf_exempt
+def team_detail(request, team_id):
+    """
+    GET: Ver info de un equipo y sus jugadores (Path Param).
+    PUT: Editar nombre, ciudad o entrenador.
+    DELETE: Borrar equipo.
+    """
+    try:
+        team = Team.objects.get(id=team_id)
+    except Team.DoesNotExist:
+        return JsonResponse({"error": "Equipo no encontrado"}, status=404)
+
+    if request.method == 'GET':
+        # Devolvemos el equipo y su lista de jugadores
+        players = team.players.all()
+        return JsonResponse({
+            "id": team.id,
+            "name": team.name,
+            "city": team.city,
+            "coach": team.coach_name,
+            "players": [{"id": p.id, "name": p.name} for p in players]
+        })
+
+    elif request.method == 'PUT':
+        body = json.loads(request.body)
+        team.name = body.get('name', team.name)
+        team.city = body.get('city', team.city)
+        team.coach_name = body.get('coach', team.coach_name)
+        team.save()
+        return JsonResponse({"message": "Equipo actualizado"})
+
+    elif request.method == 'DELETE':
+        team.delete()
+        return JsonResponse({"message": "Equipo eliminado"}, status=200)
+
+@csrf_exempt
+def season_stats(request, player_id, season):
+    if request.method == 'GET':
+        stats = FielderStat.objects.filter(player_id=player_id, game__season=season)
+        total_h = sum(s.h for s in stats)
+        total_tb = sum(s.tb for s in stats)
+        avg = total_h / total_tb if total_tb > 0 else 0
+
+        return JsonResponse({
+            "player_id": player_id,
+            "season": season,
+            "total_hits": total_h,
+            "avg": round(avg, 3)
+        })
