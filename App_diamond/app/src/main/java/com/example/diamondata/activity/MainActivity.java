@@ -1,8 +1,10 @@
-package com.example.diamondata;
+package com.example.diamondata.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.diamondata.R;
 import com.google.android.material.card.MaterialCardView;
 
 public class MainActivity extends AppCompatActivity {

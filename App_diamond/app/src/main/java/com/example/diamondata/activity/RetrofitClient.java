@@ -1,4 +1,4 @@
-package com.example.diamondata;
+package com.example.diamondata.activity;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;

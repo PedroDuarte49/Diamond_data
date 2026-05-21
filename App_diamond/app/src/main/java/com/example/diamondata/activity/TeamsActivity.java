@@ -1,4 +1,4 @@
-package com.example.diamondata;
+package com.example.diamondata.activity;
 
 import android.os.Bundle;
 import android.widget.Toast;
@@ -7,7 +7,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class TeamsActivity extends AppCompatActivity {/*
+import com.example.diamondata.DiamondApiService;
+import com.example.diamondata.R;
+import com.example.diamondata.adapter.TeamsAdapter;
+import com.example.diamondata.models.Team;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class TeamsActivity extends AppCompatActivity {
     private RecyclerView rvTeams;
     private DiamondApiService apiService;
 
@@ -41,4 +52,4 @@ public class TeamsActivity extends AppCompatActivity {/*
             }
         });
     }
-*/}
+}
