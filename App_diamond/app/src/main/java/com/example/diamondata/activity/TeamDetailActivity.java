@@ -62,6 +62,9 @@ public class TeamDetailActivity extends AppCompatActivity {
             // Aquí podrás lanzar el Intent hacia tu GameListActivity si lo deseas
             Toast.makeText(this, "Abriendo lista de partidos...", Toast.LENGTH_SHORT).show();
         });
+
+        com.google.android.material.floatingactionbutton.FloatingActionButton fabAddPlayer = findViewById(R.id.fabAddPlayer);
+        fabAddPlayer.setOnClickListener(v -> abrirDialogoNuevoJugador());
     }
 
     private void obtenerRoster() {
@@ -202,5 +205,61 @@ public class TeamDetailActivity extends AppCompatActivity {
                 Toast.makeText(TeamDetailActivity.this, "Error al guardar pitcher", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void abrirDialogoNuevoJugador() {
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.dialog_create_player);
+        // Hacemos que los bordes del diálogo sean transparentes para que respete tu diseño de esquinas
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+        EditText etName = dialog.findViewById(R.id.etPlayerName);
+        EditText etNumber = dialog.findViewById(R.id.etPlayerNumber);
+        Button btnSavePlayer = dialog.findViewById(R.id.btnSavePlayer);
+        // RadioButtons para saber si es Fielder o Pitcher
+        android.widget.RadioButton rbFielder = dialog.findViewById(R.id.rbFielder);
+
+        btnSavePlayer.setOnClickListener(v -> {
+            String name = etName.getText().toString().trim();
+            String numberStr = etNumber.getText().toString().trim();
+
+            if (name.isEmpty() || numberStr.isEmpty()) {
+                Toast.makeText(this, "Rellena nombre y número", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            int number = Integer.parseInt(numberStr);
+            String position = rbFielder.isChecked() ? "F" : "P"; // "F" de Fielder o "P" de Pitcher
+
+            // Creamos el jugador asignándole el ID del equipo en el que estamos (teamId)
+            Player nuevoJugador = new Player(name, number, position, teamId);
+
+            // Llamada a Django
+            apiService.createPlayer(nuevoJugador).enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    if (response.isSuccessful()) {
+                        Toast.makeText(TeamDetailActivity.this, "Jugador fichado con éxito", Toast.LENGTH_SHORT).show();
+                        dialog.dismiss(); // Cierra el formulario emergente
+                        obtenerRoster(); // ¡Recargamos la lista automáticamente para ver al nuevo jugador!
+                    } else {
+                        // TRUCO: Leer exactamente el mensaje de queja de Django
+                        try {
+                            String errorDjango = response.errorBody().string();
+                            Toast.makeText(TeamDetailActivity.this, "Django dice: " + errorDjango, Toast.LENGTH_LONG).show();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    Toast.makeText(TeamDetailActivity.this, "Fallo de conexión", Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
+
+        dialog.show();
     }
 }

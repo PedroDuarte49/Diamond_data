@@ -1,11 +1,16 @@
 package com.example.diamondata.models;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Player {
     private int id;
     private String name;
     private int number;
-    private String position_type; // "F" o "P"
-    private Integer team; // ID del equipo (puede ser null)
+
+    // Le indicamos exactamente cómo se llama en Django
+    @SerializedName("type")
+    private String position_type;
+    private Integer team;
 
     public Player(String name, int number, String position_type, Integer team) {
         this.name = name;

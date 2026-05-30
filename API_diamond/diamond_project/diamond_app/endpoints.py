@@ -28,16 +28,34 @@ def players_handler(request):
         } for p in players]
         return JsonResponse(data, safe=False, status=200)
 
+
     elif request.method == 'POST':
+
         try:
-            body = json.loads(request.body)  # Uso de JSON en el cuerpo [cite: 104]
+
+            body = json.loads(request.body)
+
+            # Capturamos el equipo que nos envía Android
+
+            equipo_id = body.get('team', None)
+
             new_player = Player.objects.create(
+
                 name=body['name'],
+
                 number=body['number'],
-                position_type=body['type']
+
+                position_type=body['type'],
+
+                team_id=equipo_id
+
             )
-            return JsonResponse({"id": new_player.id, "message": "Jugador creado"}, status=201)
-        except (KeyError, json.JSONDecodeError):
+
+            return JsonResponse({"message": "Jugador creado", "id": new_player.id}, status=201)
+
+
+        except KeyError:
+
             return JsonResponse({"error": "Datos inválidos"}, status=400)
 
     return JsonResponse({"error": "Método no soportado"}, status=405)
@@ -184,7 +202,7 @@ def team_detail(request, team_id):
             "name": team.name,
             "city": team.city,
             "coach": team.coach_name,
-            "players": [{"id": p.id, "name": p.name} for p in players]
+            "players": [{"id": p.id, "name": p.name, "number": p.number, "type": p.position_type} for p in players]
         })
 
     elif request.method == 'PUT':
