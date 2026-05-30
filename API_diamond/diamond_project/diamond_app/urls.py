@@ -15,4 +15,7 @@ urlpatterns = [
     # Información de los equipos
     path('teams/', endpoints.teams_handler),
     path('teams/<int:team_id>/', endpoints.team_detail),
+
+    #Información de los partidos
+    path('games/', endpoints.games_handler),
 ]

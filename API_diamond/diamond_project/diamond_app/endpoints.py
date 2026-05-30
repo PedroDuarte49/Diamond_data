@@ -231,3 +231,29 @@ def season_stats(request, player_id, season):
             "total_hits": total_h,
             "avg": round(avg, 3)
         })
+
+@csrf_exempt
+def games_handler(request):
+    if request.method == 'GET':
+        games = Game.objects.all()
+        data = [{
+            "id": g.id,
+            "opponent": g.opponent,
+            "date": str(g.date),
+            "season": g.season,
+            "location": g.location
+        } for g in games]
+        return JsonResponse(data, safe=False, status=200)
+
+    elif request.method == 'POST':
+        try:
+            body = json.loads(request.body)
+            new_game = Game.objects.create(
+                opponent=body['opponent'],
+                date=body['date'], # Debe enviarse en formato YYYY-MM-DD
+                season=body.get('season', '2026'),
+                location=body['location']
+            )
+            return JsonResponse({"message": "Partido creado", "id": new_game.id}, status=201)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)

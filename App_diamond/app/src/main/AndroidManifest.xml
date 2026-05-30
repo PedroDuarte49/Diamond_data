@@ -29,6 +29,7 @@
         <activity android:name=".activity.TeamDetailActivity" />
         <activity android:name=".activity.MyProfileActivity" />
         <activity android:name=".activity.SeasonsActivity" />
+        <activity android:name=".activity.GamesActivity" />
 
     </application>
 

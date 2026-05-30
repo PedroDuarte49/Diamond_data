@@ -1,10 +1,20 @@
 package com.example.diamondata.models;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Game {
     private int id;
+
+    @SerializedName("opponent")
     private String opponent;
-    private String date; // Formato "YYYY-MM-DD"
+
+    @SerializedName("date")
+    private String date;
+
+    @SerializedName("season")
     private String season;
+
+    @SerializedName("location")
     private String location;
 
     public Game(String opponent, String date, String season, String location) {

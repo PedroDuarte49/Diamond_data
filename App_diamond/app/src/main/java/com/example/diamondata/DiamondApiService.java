@@ -1,6 +1,7 @@
 package com.example.diamondata;
 
 import com.example.diamondata.models.FielderStat;
+import com.example.diamondata.models.Game;
 import com.example.diamondata.models.PitcherStat;
 import com.example.diamondata.models.Player;
 import com.example.diamondata.models.Team;
@@ -35,4 +36,11 @@ public interface DiamondApiService {
 
     @POST("api/stats/pitcher/")
     Call<ResponseBody> savePitcherStat(@Body PitcherStat stats);
+
+    // --- PARTIDOS ---
+    @GET("api/games/")
+    Call<List<Game>> getAllGames();
+
+    @POST("api/games/")
+    Call<ResponseBody> createGame(@Body Game game);
 }

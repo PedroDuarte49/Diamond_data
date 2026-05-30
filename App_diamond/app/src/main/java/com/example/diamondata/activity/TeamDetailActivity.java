@@ -1,6 +1,7 @@
 package com.example.diamondata.activity;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -59,8 +60,9 @@ public class TeamDetailActivity extends AppCompatActivity {
 
         // Acción del botón de partidos
         btnViewMatches.setOnClickListener(v -> {
-            // Aquí podrás lanzar el Intent hacia tu GameListActivity si lo deseas
-            Toast.makeText(this, "Abriendo lista de partidos...", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(TeamDetailActivity.this, GamesActivity.class);
+            intent.putExtra("TEAM_ID", teamId);
+            startActivity(intent);
         });
 
         com.google.android.material.floatingactionbutton.FloatingActionButton fabAddPlayer = findViewById(R.id.fabAddPlayer);
