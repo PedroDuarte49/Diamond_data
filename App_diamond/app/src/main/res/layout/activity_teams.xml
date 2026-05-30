@@ -21,7 +21,7 @@
             android:layout_marginBottom="20dp"/>
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvTeams"
+            android:id="@+id/listaEquipos"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
