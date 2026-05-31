@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/card_navy">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:id="@+id/tvStatsPlayerName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nombre Jugador"
+            android:textSize="22sp"
+            android:textColor="@color/accent_orange"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- CAMPOS PARA BATEADOR (13 Estadísticas) -->
+        <LinearLayout android:id="@+id/layoutFielderStats" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                <EditText android:id="@+id/etFielderTB" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:hint="Turnos (TB)" android:inputType="number" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:backgroundTint="@color/accent_orange" android:layout_marginStart="8dp"/>
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                <EditText android:id="@+id/etFielderC" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:hint="Carreras (C)" android:inputType="number" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:backgroundTint="@color/accent_orange" android:layout_marginEnd="8dp"/>
+                <EditText android:id="@+id/etFielderH" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:hint="Hits (H)" android:inputType="number" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:backgroundTint="@color/accent_orange" android:layout_marginStart="8dp"/>
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                <EditText android:id="@+id/etFielderH2" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:hint="Dobles (2B)" android:inputType="number" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:backgroundTint="@color/accent_orange" android:layout_marginEnd="8dp"/>
+                <EditText android:id="@+id/etFielderH3" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:hint="Triples (3B)" android:inputType="number" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:backgroundTint="@color/accent_orange" android:layout_marginStart="8dp"/>
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                <EditText android:id="@+id/etFielderH4" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:hint="Jonrones (HR)" android:inputType="number" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:backgroundTint="@color/accent_orange" android:layout_marginEnd="8dp"/>
+                <EditText android:id="@+id/etFielderCIS" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:hint="Impulsadas (CI)" android:inputType="number" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:backgroundTint="@color/accent_orange" android:layout_marginStart="8dp"/>
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                <EditText android:id="@+id/etFielderBB" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:hint="Bases Bola (BB)" android:inputType="number" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:backgroundTint="@color/accent_orange" android:layout_marginEnd="8dp"/>
+                <EditText android:id="@+id/etFielderBBI" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:hint="BB Intencional" android:inputType="number" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:backgroundTint="@color/accent_orange" android:layout_marginStart="8dp"/>
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                <EditText android:id="@+id/etFielderSO" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:hint="Ponches (SO)" android:inputType="number" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:backgroundTint="@color/accent_orange" android:layout_marginEnd="8dp"/>
+                <EditText android:id="@+id/etFielderBR" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:hint="Robos (BR)" android:inputType="number" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:backgroundTint="@color/accent_orange" android:layout_marginStart="8dp"/>
+            </LinearLayout>
+            <EditText android:id="@+id/etFielderAR" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Atrapado Robando (AR)" android:inputType="number" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:backgroundTint="@color/accent_orange"/>
+        </LinearLayout>
+
+        <!-- CAMPOS PARA LANZADOR (11 Estadísticas) -->
+        <LinearLayout android:id="@+id/layoutPitcherStats" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                <EditText android:id="@+id/etPitcherA" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:hint="Aperturas (A)" android:inputType="number" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:backgroundTint="@color/accent_orange" android:layout_marginStart="8dp"/>
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                <EditText android:id="@+id/etPitcherG" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:hint="Ganados (G)" android:inputType="number" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:backgroundTint="@color/accent_orange" android:layout_marginEnd="8dp"/>
+                <EditText android:id="@+id/etPitcherP" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:hint="Perdidos (P)" android:inputType="number" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:backgroundTint="@color/accent_orange" android:layout_marginStart="8dp"/>
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                <EditText android:id="@+id/etPitcherJC" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:hint="Completos (JC)" android:inputType="number" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:backgroundTint="@color/accent_orange" android:layout_marginEnd="8dp"/>
+                <EditText android:id="@+id/etPitcherBL" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:hint="Blanqueadas (BL)" android:inputType="number" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:backgroundTint="@color/accent_orange" android:layout_marginStart="8dp"/>
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                <EditText android:id="@+id/etPitcherSV" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:hint="Salvados (SV)" android:inputType="number" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:backgroundTint="@color/accent_orange" android:layout_marginEnd="8dp"/>
+                <EditText android:id="@+id/etPitcherIL" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:hint="Innings (IL)" android:inputType="numberDecimal" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:backgroundTint="@color/accent_orange" android:layout_marginStart="8dp"/>
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                <EditText android:id="@+id/etPitcherH" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:hint="Hits (H)" android:inputType="number" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:backgroundTint="@color/accent_orange" android:layout_marginEnd="8dp"/>
+                <EditText android:id="@+id/etPitcherCL" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:hint="Carr. Limpias (CL)" android:inputType="number" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:backgroundTint="@color/accent_orange" android:layout_marginStart="8dp"/>
+            </LinearLayout>
+            <EditText android:id="@+id/etPitcherSO" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Ponches (SO)" android:inputType="number" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:backgroundTint="@color/accent_orange"/>
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSavePlayerStats"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp"
+            android:text="GUARDAR STATS"
+            android:textStyle="bold"
+            app:cornerRadius="8dp"
+            app:backgroundTint="@color/accent_orange" />
+    </LinearLayout>
+</ScrollView>

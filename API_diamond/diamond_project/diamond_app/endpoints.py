@@ -149,7 +149,6 @@ def pitcher_stats_handler(request):
                 pcl=body.get('pcl', 0.0),  # ERA
                 il=body.get('il', 0.0),  # Entradas lanzadas
                 so=body.get('so', 0),
-                bb=body.get('bb', 0)
             )
             return JsonResponse({"id": stat.id, "message": "Estadística de pitcheo guardada"}, status=201)
         except Exception as e:
@@ -257,3 +256,17 @@ def games_handler(request):
             return JsonResponse({"message": "Partido creado", "id": new_game.id}, status=201)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
+
+@csrf_exempt
+def game_detail(request, game_id):
+    try:
+        game = Game.objects.get(id=game_id)
+    except Game.DoesNotExist:
+        return JsonResponse({"error": "Partido no encontrado"}, status=404)
+
+    if request.method == 'PUT':
+        body = json.loads(request.body)
+        game.team_score = body.get('team_score', game.team_score)
+        game.opponent_score = body.get('opponent_score', game.opponent_score)
+        game.save()
+        return JsonResponse({"message": "Resultado guardado"})

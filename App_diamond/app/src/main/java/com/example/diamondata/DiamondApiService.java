@@ -12,6 +12,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 public interface DiamondApiService {
@@ -43,4 +44,11 @@ public interface DiamondApiService {
 
     @POST("api/games/")
     Call<ResponseBody> createGame(@Body Game game);
+
+    @PUT("api/games/{id}/")
+    Call<ResponseBody> updateGame(@Path("id") int gameId, @Body Game game);
+
+    // Obtener estadísticas de un jugador por temporada
+    @GET("stats/season/{player_id}/{season}/")
+    Call<okhttp3.ResponseBody> getPlayerSeasonStats(@Path("player_id") int playerId, @Path("season") String season);
 }

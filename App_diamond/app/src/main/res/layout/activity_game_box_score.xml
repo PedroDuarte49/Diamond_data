@@ -18,9 +18,14 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="12dp">
-            <TextView android:text="PIZARRA" android:textColor="@color/accent_orange" android:textStyle="bold" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:gravity="center">
+
+            <EditText android:id="@+id/etMyTeamScore" android:layout_width="80dp" android:layout_height="wrap_content" android:hint="Nosos" android:inputType="number" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:backgroundTint="@color/accent_orange" android:textAlignment="center" android:textSize="24sp" android:textStyle="bold"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=" - " android:textColor="@color/accent_orange" android:textSize="28sp" android:textStyle="bold" android:layout_marginHorizontal="8dp"/>
+            <EditText android:id="@+id/etOpponentScore" android:layout_width="80dp" android:layout_height="wrap_content" android:hint="Rival" android:inputType="number" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:backgroundTint="@color/accent_orange" android:textAlignment="center" android:textSize="24sp" android:textStyle="bold"/>
+
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 

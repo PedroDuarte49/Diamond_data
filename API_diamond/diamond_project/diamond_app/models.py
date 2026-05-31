@@ -26,6 +26,8 @@ class Game(models.Model):
     date = models.DateField()
     season = models.CharField(max_length=10, default="2026")
     location = models.CharField(max_length=100)
+    team_score = models.IntegerField(default=0, null=True, blank=True)
+    opponent_score = models.IntegerField(default=0, null=True, blank=True)
 
 
 # Relación N:N para Bateadores

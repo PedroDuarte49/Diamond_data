@@ -1,7 +1,11 @@
 package com.example.diamondata.models;
 
+import com.google.gson.annotations.SerializedName;
+
 public class FielderStat {
+    @SerializedName("player_id")
     private int player; // ID del jugador
+    @SerializedName("game_id")
     private int game;   // ID del partido
 
     private int j;

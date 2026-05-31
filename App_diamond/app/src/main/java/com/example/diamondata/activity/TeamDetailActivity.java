@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -77,7 +78,7 @@ public class TeamDetailActivity extends AppCompatActivity {
                     List<Player> roster = response.body().getPlayers();
                     // Conectamos un adaptador personalizado para los jugadores
                     // Le pasamos la lista de jugadores y una interfaz de callback para el click
-                    PlayerAdapter adapter = new PlayerAdapter(roster, player -> mostrarDialogoEstadisticas(player));
+                    PlayerAdapter adapter = new PlayerAdapter(roster, player -> verEstadisticasTemporada(player));
                     rvPlayers.setAdapter(adapter);
                 } else {
                     Toast.makeText(TeamDetailActivity.this, "No se pudo obtener el roster", Toast.LENGTH_SHORT).show();
@@ -91,122 +92,79 @@ public class TeamDetailActivity extends AppCompatActivity {
         });
     }
 
-    // 4. LÓGICA DEL DIÁLOGO EMERGENTE (Formulario Complejo)
-    private void mostrarDialogoEstadisticas(Player player) {
+    // Función para VER las estadísticas acumuladas
+    private void verEstadisticasTemporada(Player player) {
+        String temporadaActual = "2026"; // Puedes hacerlo dinámico en el futuro
+
+        apiService.getPlayerSeasonStats(player.getId(), temporadaActual).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        // Leemos la respuesta de Django (que viene en formato JSON)
+                        String jsonStats = response.body().string();
+                        org.json.JSONObject statsObj = new org.json.JSONObject(jsonStats);
+
+                        mostrarDialogoResumen(player, statsObj, temporadaActual);
+
+                    } catch (Exception e) {
+                        Toast.makeText(TeamDetailActivity.this, "Error leyendo stats", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(TeamDetailActivity.this, "El jugador aún no tiene estadísticas", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(TeamDetailActivity.this, "Error de red", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // Crea un diálogo sencillo para mostrar la información
+    private void mostrarDialogoResumen(Player player, org.json.JSONObject statsObj, String season) throws org.json.JSONException {
         Dialog dialog = new Dialog(this);
-        dialog.setContentView(R.layout.dialog_stats_form);
+        // Usamos un layout básico de Android o puedes crear uno propio (ej. dialog_view_stats)
+        dialog.setContentView(R.layout.dialog_create_player); // Reutilizamos temporalmente el fondo oscuro
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
-        TextView tvPlayerNameDialog = dialog.findViewById(R.id.tvPlayerNameDialog);
-        tvPlayerNameDialog.setText("Stats de: " + player.getName() + " (#" + player.getNumber() + ")");
+        // Vamos a inyectar el texto dinámicamente en el layout
+        LinearLayout layoutPrincipal = (LinearLayout) dialog.findViewById(R.id.rgPosition).getParent().getParent();
+        layoutPrincipal.removeAllViews(); // Limpiamos el formulario viejo de crear jugador
 
-        Button btnConfirmStats = dialog.findViewById(R.id.btnConfirmStats);
+        TextView tvTitulo = new TextView(this);
+        tvTitulo.setText("Estadísticas " + season + "\n" + player.getName());
+        tvTitulo.setTextSize(22);
+        tvTitulo.setTextColor(getResources().getColor(R.color.accent_orange));
+        tvTitulo.setPadding(0, 0, 0, 30);
+        layoutPrincipal.addView(tvTitulo);
 
-        btnConfirmStats.setOnClickListener(v -> {
-            // Evaluamos el tipo de perfil técnico ("F" = Fielder / "P" = Pitcher)
-            if ("P".equalsIgnoreCase(player.getPositionType())) {
-                enviarEstadisticasPitcher(player.getId(), dialog);
-            } else {
-                enviarEstadisticasFielder(player.getId(), dialog);
-            }
-        });
+        TextView tvStats = new TextView(this);
+        tvStats.setTextColor(getResources().getColor(R.color.text_primary));
+        tvStats.setTextSize(16);
+        tvStats.setLineSpacing(0, 1.5f);
+
+        // Formateamos el texto dependiendo de si es Pitcher o Fielder
+        StringBuilder sb = new StringBuilder();
+        if ("P".equals(player.getPositionType())) {
+            sb.append("Juegos: ").append(statsObj.optInt("j", 0)).append("\n");
+            sb.append("Ganados (G): ").append(statsObj.optInt("g", 0)).append("\n");
+            sb.append("Perdidos (P): ").append(statsObj.optInt("p", 0)).append("\n");
+            sb.append("Efectividad (ERA): ").append(statsObj.optDouble("pcl", 0.0)).append("\n");
+            sb.append("Ponches (SO): ").append(statsObj.optInt("so", 0)).append("\n");
+        } else {
+            sb.append("Juegos: ").append(statsObj.optInt("j", 0)).append("\n");
+            sb.append("Hits (H): ").append(statsObj.optInt("total_h", 0)).append("\n");
+            sb.append("Home Runs (HR): ").append(statsObj.optInt("total_hr", 0)).append("\n");
+            sb.append("Carreras Impulsadas: ").append(statsObj.optInt("total_cis", 0)).append("\n");
+            sb.append("Promedio (AVG): ").append(statsObj.optDouble("avg", 0.0)).append("\n");
+        }
+
+        tvStats.setText(sb.toString());
+        layoutPrincipal.addView(tvStats);
 
         dialog.show();
-    }
-
-    private void enviarEstadisticasFielder(int playerId, Dialog dialog) {
-        // Enlazar los EditText del GridLayout del layout dialog_stats_form.xml
-        EditText etJ = dialog.findViewById(R.id.etFielderJ);
-        EditText etTB = dialog.findViewById(R.id.etFielderTB);
-        EditText etC = dialog.findViewById(R.id.etFielderC);
-        EditText etH = dialog.findViewById(R.id.etFielderH);
-        EditText etH2 = dialog.findViewById(R.id.etFielderH2);
-        EditText etH3 = dialog.findViewById(R.id.etFielderH3);
-        EditText etH4 = dialog.findViewById(R.id.etFielderH4);
-        EditText etCIS = dialog.findViewById(R.id.etFielderCIS);
-        EditText etBB = dialog.findViewById(R.id.etFielderBB);
-        EditText etBBI = dialog.findViewById(R.id.etFielderBBI);
-        EditText etSO = dialog.findViewById(R.id.etFielderSO);
-        EditText etBR = dialog.findViewById(R.id.etFielderBR);
-        EditText etAR = dialog.findViewById(R.id.etFielderAR);
-
-        FielderStat stats = new FielderStat();
-        stats.setPlayer(playerId);
-        stats.setGame(1); // ID de juego estático temporal o recuperado dinámicamente
-
-        // Mapeo seguro capturando datos numéricos (si está vacío por defecto es 0)
-        stats.setJ(etJ.getText().toString().isEmpty() ? 0 : Integer.parseInt(etJ.getText().toString()));
-        stats.setTb(etTB.getText().toString().isEmpty() ? 0 : Integer.parseInt(etTB.getText().toString()));
-        stats.setC(etC.getText().toString().isEmpty() ? 0 : Integer.parseInt(etC.getText().toString()));
-        stats.setH(etH.getText().toString().isEmpty() ? 0 : Integer.parseInt(etH.getText().toString()));
-        stats.setH2(etH2.getText().toString().isEmpty() ? 0 : Integer.parseInt(etH2.getText().toString()));
-        stats.setH3(etH3.getText().toString().isEmpty() ? 0 : Integer.parseInt(etH3.getText().toString()));
-        stats.setH4(etH4.getText().toString().isEmpty() ? 0 : Integer.parseInt(etH4.getText().toString()));
-        stats.setCis(etCIS.getText().toString().isEmpty() ? 0 : Integer.parseInt(etCIS.getText().toString()));
-        stats.setBb(etBB.getText().toString().isEmpty() ? 0 : Integer.parseInt(etBB.getText().toString()));
-        stats.setBbi(etBBI.getText().toString().isEmpty() ? 0 : Integer.parseInt(etBBI.getText().toString()));
-        stats.setSo(etSO.getText().toString().isEmpty() ? 0 : Integer.parseInt(etSO.getText().toString()));
-        stats.setBr(etBR.getText().toString().isEmpty() ? 0 : Integer.parseInt(etBR.getText().toString()));
-        stats.setAr(etAR.getText().toString().isEmpty() ? 0 : Integer.parseInt(etAR.getText().toString()));
-
-        // Enviamos el objeto mapeado vía POST asíncrono
-        apiService.saveFielderStat(stats).enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (response.isSuccessful()) {
-                    Toast.makeText(TeamDetailActivity.this, "Estadísticas de bateo guardadas", Toast.LENGTH_SHORT).show();
-                    dialog.dismiss();
-                }
-            }
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Toast.makeText(TeamDetailActivity.this, "Error al guardar", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void enviarEstadisticasPitcher(int playerId, Dialog dialog) {
-        EditText etG = dialog.findViewById(R.id.etPitcherG);
-        EditText etP = dialog.findViewById(R.id.etPitcherP);
-        EditText etJ = dialog.findViewById(R.id.etPitcherJ);
-        EditText etA = dialog.findViewById(R.id.etPitcherA);
-        EditText etJC = dialog.findViewById(R.id.etPitcherJC);
-        EditText etBL = dialog.findViewById(R.id.etPitcherBL);
-        EditText etSV = dialog.findViewById(R.id.etPitcherSV);
-        EditText etIL = dialog.findViewById(R.id.etPitcherIL);
-        EditText etH = dialog.findViewById(R.id.etPitcherH);
-        EditText etCL = dialog.findViewById(R.id.etPitcherCL);
-        EditText etSO = dialog.findViewById(R.id.etPitcherSO);
-
-        PitcherStat stats = new PitcherStat();
-        stats.setPlayer(playerId);
-        stats.setGame(1);
-
-        stats.setG(etG.getText().toString().isEmpty() ? 0 : Integer.parseInt(etG.getText().toString()));
-        stats.setP(etP.getText().toString().isEmpty() ? 0 : Integer.parseInt(etP.getText().toString()));
-        stats.setJ(etJ.getText().toString().isEmpty() ? 0 : Integer.parseInt(etJ.getText().toString()));
-        stats.setA(etA.getText().toString().isEmpty() ? 0 : Integer.parseInt(etA.getText().toString()));
-        stats.setJc(etJC.getText().toString().isEmpty() ? 0 : Integer.parseInt(etJC.getText().toString()));
-        stats.setBl(etBL.getText().toString().isEmpty() ? 0 : Integer.parseInt(etBL.getText().toString()));
-        stats.setSv(etSV.getText().toString().isEmpty() ? 0 : Integer.parseInt(etSV.getText().toString()));
-        stats.setIl(etIL.getText().toString().isEmpty() ? 0.0 : Double.parseDouble(etIL.getText().toString()));
-        stats.setH(etH.getText().toString().isEmpty() ? 0 : Integer.parseInt(etH.getText().toString()));
-        stats.setCl(etCL.getText().toString().isEmpty() ? 0 : Integer.parseInt(etCL.getText().toString()));
-        stats.setSo(etSO.getText().toString().isEmpty() ? 0 : Integer.parseInt(etSO.getText().toString()));
-
-        apiService.savePitcherStat(stats).enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (response.isSuccessful()) {
-                    Toast.makeText(TeamDetailActivity.this, "Estadísticas de Lanzador guardadas", Toast.LENGTH_SHORT).show();
-                    dialog.dismiss();
-                }
-            }
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Toast.makeText(TeamDetailActivity.this, "Error al guardar pitcher", Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     private void abrirDialogoNuevoJugador() {

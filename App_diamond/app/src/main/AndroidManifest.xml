@@ -30,6 +30,7 @@
         <activity android:name=".activity.MyProfileActivity" />
         <activity android:name=".activity.SeasonsActivity" />
         <activity android:name=".activity.GamesActivity" />
+        <activity android:name=".activity.GameBoxScoreActivity" />
 
     </application>
 

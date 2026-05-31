@@ -17,6 +17,12 @@ public class Game {
     @SerializedName("location")
     private String location;
 
+    @SerializedName("team_score")
+    private Integer teamScore;
+
+    @SerializedName("opponent_score")
+    private Integer opponentScore;
+
     public Game(String opponent, String date, String season, String location) {
         this.opponent = opponent;
         this.date = date;
@@ -29,4 +35,8 @@ public class Game {
     public String getDate() { return date; }
     public String getSeason() { return season; }
     public String getLocation() { return location; }
+    public Integer getTeamScore() { return teamScore; }
+    public void setTeamScore(Integer teamScore) { this.teamScore = teamScore; }
+    public Integer getOpponentScore() { return opponentScore; }
+    public void setOpponentScore(Integer opponentScore) { this.opponentScore = opponentScore; }
 }

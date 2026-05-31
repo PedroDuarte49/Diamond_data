@@ -1,9 +1,12 @@
 package com.example.diamondata.models;
 
-public class PitcherStat {
-    private int player;
-    private int game;
+import com.google.gson.annotations.SerializedName;
 
+public class PitcherStat {
+    @SerializedName("player_id")
+    private int player; // ID del jugador
+    @SerializedName("game_id")
+    private int game;   // ID del partido
     private int g;
     private int p;
     private double pcl; // Efectividad (ERA)

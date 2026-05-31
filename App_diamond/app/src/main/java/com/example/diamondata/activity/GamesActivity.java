@@ -53,7 +53,7 @@ public class GamesActivity extends AppCompatActivity {
             public void onResponse(Call<List<Game>> call, Response<List<Game>> response) {
                 if (response.isSuccessful() && response.body() != null) {
 
-                    GamesAdapter adapter = new GamesAdapter(response.body());
+                    GamesAdapter adapter = new GamesAdapter(response.body(), teamId);
                     rvGames.setAdapter(adapter);
 
                 }

@@ -1,5 +1,6 @@
 package com.example.diamondata.adapter;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.diamondata.R;
+import com.example.diamondata.activity.GameBoxScoreActivity;
 import com.example.diamondata.models.Game;
 
 import java.util.List;
@@ -16,9 +18,11 @@ import java.util.List;
 public class GamesAdapter extends RecyclerView.Adapter<GamesAdapter.GameViewHolder> {
 
     private List<Game> gamesList;
+    private int teamId;
 
-    public GamesAdapter(List<Game> gamesList) {
+    public GamesAdapter(List<Game> gamesList, int teamId) {
         this.gamesList = gamesList;
+        this.teamId = teamId;
     }
 
     @NonNull
@@ -36,8 +40,12 @@ public class GamesAdapter extends RecyclerView.Adapter<GamesAdapter.GameViewHold
         holder.tvGameDetails.setText(game.getDate() + " | " + game.getLocation());
         holder.tvGameSeason.setText("Temporada: " + game.getSeason());
 
-        //  Aquí en el futuro puedes ponerle un OnClickListener
-        // para que al tocar el partido te lleve a ver la pizarra/estadísticas.
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), GameBoxScoreActivity.class);
+            intent.putExtra("GAME_ID", game.getId());
+            intent.putExtra("TEAM_ID", teamId);
+            v.getContext().startActivity(intent);
+        });
     }
 
     @Override
