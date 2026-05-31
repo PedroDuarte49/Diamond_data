@@ -48,7 +48,14 @@ public interface DiamondApiService {
     @PUT("api/games/{id}/")
     Call<ResponseBody> updateGame(@Path("id") int gameId, @Body Game game);
 
+    @GET("api/stats/game/{game_id}/player/{player_id}/")
+    Call<okhttp3.ResponseBody> getPlayerGameStats(@Path("game_id") int gameId, @Path("player_id") int playerId);
+
     // Obtener estadísticas de un jugador por temporada
     @GET("stats/season/{player_id}/{season}/")
     Call<okhttp3.ResponseBody> getPlayerSeasonStats(@Path("player_id") int playerId, @Path("season") String season);
+
+    // 3. Para traer el detalle del partido (para el marcador)
+    @GET("api/games/{id}/")
+    Call<Game> getGameDetail(@Path("id") int gameId);
 }

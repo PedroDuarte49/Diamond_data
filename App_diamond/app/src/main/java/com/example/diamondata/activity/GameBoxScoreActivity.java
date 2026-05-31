@@ -54,37 +54,67 @@ public class GameBoxScoreActivity extends AppCompatActivity {
         rvGameRoster.setLayoutManager(new LinearLayoutManager(this));
 
         cargarRosterDelPartido();
+        cargarDatosPartido();
 
         Button btnSubmitGame = findViewById(R.id.btnSubmitGame);
         btnSubmitGame.setOnClickListener(v -> finalizarPartido());
     }
+    private void cargarDatosPartido() {
+        // Asumiendo que tienes una función en tu API para traer el detalle de UN partido
+        apiService.getGameDetail(gameId).enqueue(new Callback<Game>() {
+            @Override
+            public void onResponse(Call<Game> call, Response<Game> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Game game = response.body();
+                    EditText etMyScore = findViewById(R.id.etMyTeamScore);
+                    EditText etOpScore = findViewById(R.id.etOpponentScore);
 
+                    if (game.getTeamScore() != null) etMyScore.setText(String.valueOf(game.getTeamScore()));
+                    if (game.getOpponentScore() != null) etOpScore.setText(String.valueOf(game.getOpponentScore()));
+                }
+            }
+            @Override public void onFailure(Call<Game> call, Throwable t) {}
+        });
+    }
     private void cargarRosterDelPartido() {
         apiService.getTeamDetail(teamId).enqueue(new Callback<com.example.diamondata.TeamDetailResponse>() {
             @Override
             public void onResponse(Call<com.example.diamondata.TeamDetailResponse> call, Response<com.example.diamondata.TeamDetailResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Player> roster = response.body().getPlayers();
+
                     GameRosterAdapter adapter = new GameRosterAdapter(roster, player -> {
-                        // SOLUCIÓN PROBLEMA 2: Evitar que el usuario lo rellene varias veces
-                        if (jugadoresGuardados.contains(player.getId())) {
-                            Toast.makeText(GameBoxScoreActivity.this, "Ya añadiste los datos de " + player.getName(), Toast.LENGTH_SHORT).show();
-                        } else {
-                            abrirDialogoEstadisticas(player);
-                        }
+                        // LA MAGIA: Antes de abrir el diálogo, preguntamos a Django si hay datos
+                        apiService.getPlayerGameStats(gameId, player.getId()).enqueue(new Callback<ResponseBody>() {
+                            @Override
+                            public void onResponse(Call<ResponseBody> c, Response<ResponseBody> r) {
+                                if (r.isSuccessful() && r.body() != null) {
+                                    try {
+                                        // ¡TIENE DATOS! Abrimos en MODO EDICIÓN
+                                        org.json.JSONObject stats = new org.json.JSONObject(r.body().string());
+                                        abrirDialogoEstadisticas(player, stats);
+                                    } catch (Exception e) {
+                                        abrirDialogoEstadisticas(player, null);
+                                    }
+                                } else {
+                                    // 404 NO TIENE DATOS. Abrimos en MODO NUEVO
+                                    abrirDialogoEstadisticas(player, null);
+                                }
+                            }
+                            @Override
+                            public void onFailure(Call<ResponseBody> c, Throwable t) {
+                                abrirDialogoEstadisticas(player, null);
+                            }
+                        });
                     });
                     rvGameRoster.setAdapter(adapter);
                 }
             }
-
-            @Override
-            public void onFailure(Call<com.example.diamondata.TeamDetailResponse> call, Throwable t) {
-                Toast.makeText(GameBoxScoreActivity.this, "Error cargando roster", Toast.LENGTH_SHORT).show();
-            }
+            @Override public void onFailure(Call<com.example.diamondata.TeamDetailResponse> call, Throwable t) { }
         });
     }
 
-    private void abrirDialogoEstadisticas(Player player) {
+    private void abrirDialogoEstadisticas(Player player, org.json.JSONObject statsPreexistentes) {
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.dialog_quick_stats);
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
@@ -92,7 +122,6 @@ public class GameBoxScoreActivity extends AppCompatActivity {
         TextView tvName = dialog.findViewById(R.id.tvStatsPlayerName);
         tvName.setText(player.getName() + " #" + player.getNumber());
 
-        // Atención: hemos cambiado de GridLayout a LinearLayout en el XML
         LinearLayout layoutFielder = dialog.findViewById(R.id.layoutFielderStats);
         LinearLayout layoutPitcher = dialog.findViewById(R.id.layoutPitcherStats);
         Button btnSave = dialog.findViewById(R.id.btnSavePlayerStats);
@@ -101,18 +130,58 @@ public class GameBoxScoreActivity extends AppCompatActivity {
         layoutPitcher.setVisibility(isPitcher ? View.VISIBLE : View.GONE);
         layoutFielder.setVisibility(isPitcher ? View.GONE : View.VISIBLE);
 
-        btnSave.setOnClickListener(v -> {
+        // 👇 MODO EDICIÓN: Rellenamos automáticamente y cambiamos el botón 👇
+        if (statsPreexistentes != null) {
+            btnSave.setText("ACTUALIZAR STATS");
             if (isPitcher) {
-                guardarDatosPitcher(player.getId(), dialog);
+                preRellenar(dialog, R.id.etPitcherA, statsPreexistentes, "a");
+                preRellenar(dialog, R.id.etPitcherG, statsPreexistentes, "g");
+                preRellenar(dialog, R.id.etPitcherP, statsPreexistentes, "p");
+                preRellenar(dialog, R.id.etPitcherJC, statsPreexistentes, "jc");
+                preRellenar(dialog, R.id.etPitcherBL, statsPreexistentes, "bl");
+                preRellenar(dialog, R.id.etPitcherSV, statsPreexistentes, "sv");
+                preRellenar(dialog, R.id.etPitcherIL, statsPreexistentes, "il");
+                preRellenar(dialog, R.id.etPitcherH, statsPreexistentes, "h");
+                preRellenar(dialog, R.id.etPitcherCL, statsPreexistentes, "cl");
+                preRellenar(dialog, R.id.etPitcherSO, statsPreexistentes, "so");
             } else {
-                guardarDatosFielder(player.getId(), dialog);
+                preRellenar(dialog, R.id.etFielderTB, statsPreexistentes, "tb");
+                preRellenar(dialog, R.id.etFielderC, statsPreexistentes, "c");
+                preRellenar(dialog, R.id.etFielderH, statsPreexistentes, "h");
+                preRellenar(dialog, R.id.etFielderH2, statsPreexistentes, "h2");
+                preRellenar(dialog, R.id.etFielderH3, statsPreexistentes, "h3");
+                preRellenar(dialog, R.id.etFielderH4, statsPreexistentes, "h4");
+                preRellenar(dialog, R.id.etFielderCIS, statsPreexistentes, "cis");
+                preRellenar(dialog, R.id.etFielderBB, statsPreexistentes, "bb");
+                preRellenar(dialog, R.id.etFielderBBI, statsPreexistentes, "bbi");
+                preRellenar(dialog, R.id.etFielderSO, statsPreexistentes, "so");
+                preRellenar(dialog, R.id.etFielderBR, statsPreexistentes, "br");
+                preRellenar(dialog, R.id.etFielderAR, statsPreexistentes, "ar");
             }
+        } else {
+            btnSave.setText("GUARDAR STATS");
+        }
+
+        btnSave.setOnClickListener(v -> {
+            if (isPitcher) { guardarDatosPitcher(player.getId(), dialog); }
+            else { guardarDatosFielder(player.getId(), dialog); }
         });
 
         dialog.show();
-
         if (dialog.getWindow() != null) {
             dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+    }
+
+    // Pequeña función de apoyo para rellenar los campos sin ensuciar el código
+    private void preRellenar(Dialog dialog, int viewId, org.json.JSONObject stats, String key) {
+        if (stats.has(key)) {
+            EditText et = dialog.findViewById(viewId);
+            String valor = stats.optString(key);
+
+            // EL CAMBIO: quitamos la comprobación de !valor.equals("0")
+            // Ahora si el valor es 0, lo escribirá en el EditText
+            et.setText(valor);
         }
     }
 

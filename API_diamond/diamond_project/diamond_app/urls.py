@@ -19,6 +19,7 @@ urlpatterns = [
     #Información de los partidos
     path('games/', endpoints.games_handler),
     path('games/<int:game_id>/', endpoints.game_detail),
+    path('stats/game/<int:game_id>/player/<int:player_id>/', endpoints.get_player_game_stats),
 
     # Ver estadísticas acumuladas por temporada
     path('stats/season/<int:player_id>/<str:season>/', endpoints.season_stats),
