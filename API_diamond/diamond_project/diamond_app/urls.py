@@ -23,4 +23,5 @@ urlpatterns = [
 
     # Ver estadísticas acumuladas por temporada
     path('stats/season/<int:player_id>/<str:season>/', endpoints.season_stats),
+    path('stats/team/<int:team_id>/season/<str:season>/', endpoints.team_season_stats),
 ]

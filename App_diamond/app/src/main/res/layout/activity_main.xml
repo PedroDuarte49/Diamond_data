@@ -133,7 +133,7 @@
 
         <!-- Card TEMPORADAS -->
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardTemporadas"
+            android:id="@+id/cardHistorico"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardBackgroundColor="@color/card_navy"

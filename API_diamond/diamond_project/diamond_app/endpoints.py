@@ -2,6 +2,7 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import Player, Game, FielderStat, PitcherStat, Team
+from django.db.models import Sum
 
 
 # --- GESTIÓN DE JUGADORES ---
@@ -276,3 +277,43 @@ def get_player_game_stats(request, game_id, player_id):
         except PitcherStat.DoesNotExist:
             return JsonResponse({"error": "No stats"}, status=404)
 
+
+@csrf_exempt
+def get_season_stats(request, team_id, season):
+    # Sumamos todas las estadísticas de todos los jugadores de un equipo en una temporada
+    # Esto nos servirá para la tabla de líderes del equipo
+    stats = FielderStat.objects.filter(player__team_id=team_id, game__season=season).values('player__name').annotate(
+        total_h=Sum('h'), total_c=Sum('c'), total_hr=Sum('h4')
+    )
+    return JsonResponse(list(stats), safe=False)
+
+@csrf_exempt
+def team_season_stats(request, team_id, season):
+    if request.method == 'GET':
+        # 1. Sumamos las estadísticas de Bateo (Fielder)
+        fielders = FielderStat.objects.filter(
+            player__team_id=team_id,
+            game__season=season
+        ).values(
+            'player__name', 'player__number'
+        ).annotate(
+            total_h=Sum('h'), total_c=Sum('c'), total_h2=Sum('h2'),
+            total_h3=Sum('h3'), total_h4=Sum('h4'), total_cis=Sum('cis')
+        ).order_by('-total_h') # Ordena de más a menos Hits
+
+        # 2. Sumamos las estadísticas de Pitcheo
+        pitchers = PitcherStat.objects.filter(
+            player__team_id=team_id,
+            game__season=season
+        ).values(
+            'player__name', 'player__number'
+        ).annotate(
+            total_g=Sum('g'), total_p=Sum('p'), total_so=Sum('so'),
+            total_sv=Sum('sv')
+        ).order_by('-total_so') # Ordena de más a menos Ponches
+
+        # Devolvemos ambos paquetes
+        return JsonResponse({
+            "fielders": list(fielders),
+            "pitchers": list(pitchers)
+        })

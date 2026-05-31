@@ -58,4 +58,7 @@ public interface DiamondApiService {
     // 3. Para traer el detalle del partido (para el marcador)
     @GET("api/games/{id}/")
     Call<Game> getGameDetail(@Path("id") int gameId);
+    // --- HISTÓRICO ---
+    @GET("api/stats/team/{team_id}/season/{season}/")
+    Call<okhttp3.ResponseBody> getTeamSeasonStats(@Path("team_id") int teamId, @Path("season") String season);
 }

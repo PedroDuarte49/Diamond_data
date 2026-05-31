@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity {
         // 1. Vincular los componentes del XML con Java
         MaterialCardView cardEquipos = findViewById(R.id.cardEquipos);
         MaterialCardView cardYo = findViewById(R.id.cardYo);
-        MaterialCardView cardTemporadas = findViewById(R.id.cardTemporadas);
+        MaterialCardView cardTemporadas = findViewById(R.id.cardHistorico);
 
         // 2. Configurar el click para "Gestión de Equipos"
         cardEquipos.setOnClickListener(v -> {

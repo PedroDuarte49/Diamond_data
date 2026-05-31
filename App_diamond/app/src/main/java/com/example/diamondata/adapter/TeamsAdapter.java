@@ -17,9 +17,13 @@ import java.util.List;
 public class TeamsAdapter extends RecyclerView.Adapter<TeamsAdapter.TeamViewHolder> {
 
     private final List<Team> teamList;
-
-    public TeamsAdapter(List<Team> teamList) {
+    private OnTeamClickListener listener;
+    public interface OnTeamClickListener {
+        void onTeamClick(Team team);
+    }
+    public TeamsAdapter(List<Team> teamList, OnTeamClickListener listener) {
         this.teamList = teamList;
+        this.listener = listener;
     }
 
     @NonNull
@@ -37,10 +41,9 @@ public class TeamsAdapter extends RecyclerView.Adapter<TeamsAdapter.TeamViewHold
 
         // Evento de navegación maestro-detalle
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(v.getContext(), TeamDetailActivity.class);
-            intent.putExtra("TEAM_ID", team.getId());
-            intent.putExtra("TEAM_NAME", team.getName());
-            v.getContext().startActivity(intent);
+            if (listener != null) {
+                listener.onTeamClick(team);
+            }
         });
     }
 

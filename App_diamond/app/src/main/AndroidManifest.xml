@@ -31,6 +31,7 @@
         <activity android:name=".activity.SeasonsActivity" />
         <activity android:name=".activity.GamesActivity" />
         <activity android:name=".activity.GameBoxScoreActivity" />
+        <activity android:name=".activity.TeamSeasonStatsActivity" />
 
     </application>
 

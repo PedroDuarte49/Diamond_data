@@ -44,7 +44,13 @@ public class TeamsActivity extends AppCompatActivity {
 
         // SOLUCIÓN AL LOGCAT: Inicializamos la lista con un adaptador vacío de base
         // Esto le quita el mensaje de advertencia al sistema operativo de inmediato
-        teamsAdapter = new TeamsAdapter(listaEquiposDeBéisbol);
+        teamsAdapter = new TeamsAdapter(listaEquiposDeBéisbol, team -> {
+            // Cuando tocamos un equipo en la pantalla principal, vamos a su detalle
+            Intent intent = new Intent(TeamsActivity.this, TeamDetailActivity.class);
+            intent.putExtra("TEAM_ID", team.getId());
+            intent.putExtra("TEAM_NAME", team.getName());
+            startActivity(intent);
+        });
         rvTeams.setAdapter(teamsAdapter);
 
         // 2. Inicializar servicio de red (Retrofit)
