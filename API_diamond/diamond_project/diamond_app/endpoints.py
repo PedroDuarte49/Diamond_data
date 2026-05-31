@@ -317,3 +317,31 @@ def team_season_stats(request, team_id, season):
             "fielders": list(fielders),
             "pitchers": list(pitchers)
         })
+
+@csrf_exempt
+def get_available_seasons(request):
+    if request.method == 'GET':
+        # Busca todas las temporadas de la tabla Game, quita los duplicados (distinct) y las ordena de mayor a menor
+        seasons = Game.objects.values_list('season', flat=True).distinct().order_by('-season')
+        return JsonResponse(list(seasons), safe=False)
+
+@csrf_exempt
+def delete_game(request, game_id):
+    if request.method == 'DELETE':
+        game = Game.objects.get(id=game_id)
+        game.delete()
+        return JsonResponse({"message": "Partido eliminado"})
+
+@csrf_exempt
+def delete_player(request, player_id):
+    if request.method == 'DELETE':
+        player = Player.objects.get(id=player_id)
+        player.delete()
+        return JsonResponse({"message": "Jugador eliminado"})
+
+@csrf_exempt
+def delete_team(request, team_id):
+    if request.method == 'DELETE':
+        team = Team.objects.get(id=team_id)
+        team.delete()
+        return JsonResponse({"message": "Equipo eliminado"})

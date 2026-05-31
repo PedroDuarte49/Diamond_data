@@ -51,5 +51,13 @@
         android:text="ENVIAR BOX SCORE COMPLETO"
         app:backgroundTint="@color/accent_orange"
         android:layout_marginTop="10dp"/>
+    <Button
+        android:id="@+id/btnDeleteGame"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="ELIMINAR PARTIDO"
+        android:backgroundTint="#D32F2F"
+        android:textColor="@android:color/white"
+        android:layout_marginTop="20dp" />
 
 </LinearLayout>

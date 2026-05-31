@@ -10,6 +10,7 @@ import java.util.List;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
@@ -61,4 +62,14 @@ public interface DiamondApiService {
     // --- HISTÓRICO ---
     @GET("api/stats/team/{team_id}/season/{season}/")
     Call<okhttp3.ResponseBody> getTeamSeasonStats(@Path("team_id") int teamId, @Path("season") String season);
+    @GET("api/seasons/")
+    Call<java.util.List<String>> getAvailableSeasons();
+
+    // El Trio DELETE
+    @DELETE("api/games/{id}/delete/")
+    Call<ResponseBody> deleteGame(@Path("id") int gameId);
+    @DELETE("api/players/{id}/delete/")
+    Call<ResponseBody> deletePlayer(@Path("id") int playerId);
+    @DELETE("api/teams/{id}/delete/")
+    Call<ResponseBody> deleteTeam(@Path("id") int teamId);
 }

@@ -58,6 +58,12 @@ public class GameBoxScoreActivity extends AppCompatActivity {
 
         Button btnSubmitGame = findViewById(R.id.btnSubmitGame);
         btnSubmitGame.setOnClickListener(v -> finalizarPartido());
+        Button btnDelete = findViewById(R.id.btnDeleteGame);
+
+        btnDelete.setOnClickListener(v -> {
+            // Llamamos a la función de confirmación pasando el ID del partido
+            confirmarBorrado(gameId, "Partido");
+        });
     }
     private void cargarDatosPartido() {
         // Asumiendo que tienes una función en tu API para traer el detalle de UN partido
@@ -333,6 +339,35 @@ public class GameBoxScoreActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Toast.makeText(GameBoxScoreActivity.this, "Error guardando el partido", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // 3. La función de confirmación (el "portero" que evita borrados accidentales)
+    private void confirmarBorrado(int id, String tipo) {
+        new android.app.AlertDialog.Builder(this)
+                .setTitle("Eliminar " + tipo)
+                .setMessage("¿Estás seguro de que quieres eliminar este partido? Se borrarán también sus estadísticas.")
+                .setPositiveButton("Borrar", (dialog, which) -> ejecutarBorrado(id))
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    // 4. La función que ejecuta la llamada a Django
+    private void ejecutarBorrado(int id) {
+        apiService.deleteGame(id).enqueue(new Callback<okhttp3.ResponseBody>() {
+            @Override
+            public void onResponse(Call<okhttp3.ResponseBody> call, Response<okhttp3.ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(GameBoxScoreActivity.this, "Partido eliminado", Toast.LENGTH_SHORT).show();
+                    finish(); // Cerramos la pantalla y volvemos atrás
+                } else {
+                    Toast.makeText(GameBoxScoreActivity.this, "Error al borrar", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<okhttp3.ResponseBody> call, Throwable t) {
+                Toast.makeText(GameBoxScoreActivity.this, "Error de red", Toast.LENGTH_SHORT).show();
             }
         });
     }

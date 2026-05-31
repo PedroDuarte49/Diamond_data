@@ -148,4 +148,10 @@ public class GamesActivity extends AppCompatActivity {
         });
         dialog.show();
     }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Cada vez que vuelves a esta pantalla, recarga los partidos
+        cargarPartidos();
+    }
 }

@@ -3,6 +3,7 @@ package com.example.diamondata.activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -48,6 +49,7 @@ public class TeamDetailActivity extends AppCompatActivity {
         tvDetailTeamName = findViewById(R.id.tvDetailTeamName);
         rvPlayers = findViewById(R.id.rvPlayers);
         btnViewMatches = findViewById(R.id.btnViewMatches);
+        View btnDeleteTeam = findViewById(R.id.btnDeleteTeam);
 
         if (teamName != null) {
             tvDetailTeamName.setText(teamName);
@@ -66,6 +68,8 @@ public class TeamDetailActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        btnDeleteTeam.setOnClickListener(v -> confirmarBorradoEquipo());
+
         com.google.android.material.floatingactionbutton.FloatingActionButton fabAddPlayer = findViewById(R.id.fabAddPlayer);
         fabAddPlayer.setOnClickListener(v -> abrirDialogoNuevoJugador());
     }
@@ -76,15 +80,16 @@ public class TeamDetailActivity extends AppCompatActivity {
             public void onResponse(Call<TeamDetailResponse> call, Response<TeamDetailResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Player> roster = response.body().getPlayers();
-                    // Conectamos un adaptador personalizado para los jugadores
-                    // Le pasamos la lista de jugadores y una interfaz de callback para el click
-                    PlayerAdapter adapter = new PlayerAdapter(roster, player -> verEstadisticasTemporada(player));
+
+                    PlayerAdapter adapter = new PlayerAdapter(roster,
+                            player -> verEstadisticasTemporada(player), // Clic en tarjeta
+                            player -> confirmarBorradoJugador(player)   // Clic en papelera
+                    );
                     rvPlayers.setAdapter(adapter);
                 } else {
                     Toast.makeText(TeamDetailActivity.this, "No se pudo obtener el roster", Toast.LENGTH_SHORT).show();
                 }
             }
-
             @Override
             public void onFailure(Call<TeamDetailResponse> call, Throwable t) {
                 Toast.makeText(TeamDetailActivity.this, "Error de red: " + t.getMessage(), Toast.LENGTH_SHORT).show();
@@ -221,5 +226,65 @@ public class TeamDetailActivity extends AppCompatActivity {
         });
 
         dialog.show();
+    }
+
+    // Función para preguntar si estamos seguros
+    private void confirmarBorradoJugador(Player player) {
+        new android.app.AlertDialog.Builder(this)
+                .setTitle("Despedir Jugador")
+                .setMessage("¿Estás seguro de que quieres eliminar a " + player.getName() + " del roster? Se perderán sus estadísticas asociadas.")
+                .setPositiveButton("Despedir", (dialog, which) -> ejecutarBorradoJugador(player.getId()))
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    // Función que avisa a Django y recarga la lista
+    private void ejecutarBorradoJugador(int playerId) {
+        apiService.deletePlayer(playerId).enqueue(new Callback<okhttp3.ResponseBody>() {
+            @Override
+            public void onResponse(Call<okhttp3.ResponseBody> call, Response<okhttp3.ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(TeamDetailActivity.this, "Jugador eliminado", Toast.LENGTH_SHORT).show();
+                    obtenerRoster(); // ¡La lista se actualiza sola al instante!
+                } else {
+                    Toast.makeText(TeamDetailActivity.this, "Error al borrar", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<okhttp3.ResponseBody> call, Throwable t) {
+                Toast.makeText(TeamDetailActivity.this, "Error de red", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void confirmarBorradoEquipo() {
+        new android.app.AlertDialog.Builder(this)
+                .setTitle("⚠️ ELIMINAR EQUIPO ⚠️")
+                .setMessage("¿Estás ABSOLUTAMENTE SEGURO? Esta acción destruirá el equipo, todos sus jugadores, todos sus partidos y todo su historial de estadísticas para siempre. No se puede deshacer.")
+                .setPositiveButton("SÍ, ELIMINAR TODO", (dialog, which) -> ejecutarBorradoEquipo())
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    // 2. La llamada nuclear a Django
+    private void ejecutarBorradoEquipo() {
+        apiService.deleteTeam(teamId).enqueue(new Callback<okhttp3.ResponseBody>() {
+            @Override
+            public void onResponse(Call<okhttp3.ResponseBody> call, Response<okhttp3.ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(TeamDetailActivity.this, "Equipo destruido", Toast.LENGTH_LONG).show();
+                    // Cerramos esta pantalla para que Android nos devuelva a la lista de equipos principal
+                    finish();
+                } else {
+                    Toast.makeText(TeamDetailActivity.this, "Error al borrar", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<okhttp3.ResponseBody> call, Throwable t) {
+                Toast.makeText(TeamDetailActivity.this, "Error de conexión", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

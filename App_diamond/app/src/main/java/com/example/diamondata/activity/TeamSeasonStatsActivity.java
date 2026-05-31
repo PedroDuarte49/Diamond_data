@@ -41,24 +41,52 @@ public class TeamSeasonStatsActivity extends AppCompatActivity {
         TextView tvTitle = findViewById(R.id.tvSeasonTeamName);
         tvTitle.setText(teamName + " - Histórico");
 
+        spinnerSeason = findViewById(R.id.spinnerSeason);
+
         rvSeasonStats = findViewById(R.id.rvSeasonStats);
         rvSeasonStats.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
 
-        spinnerSeason = findViewById(R.id.spinnerSeason);
-        String[] temporadas = {"2026", "2025", "2024"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, temporadas);
-        spinnerSeason.setAdapter(adapter);
+        cargarTemporadasReales();
 
-        // 👇 LA MAGIA: Escuchamos cuando el usuario cambia de año 👇
+        // 2. Escuchador del desplegable
         spinnerSeason.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String yearSeleccionado = parent.getItemAtPosition(position).toString();
-                pedirEstadisticasADjango(yearSeleccionado);
+                // Omitimos cargar si dice "Sin datos"
+                if (!yearSeleccionado.equals("Sin datos")) {
+                    pedirEstadisticasADjango(yearSeleccionado);
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) { }
+        });
+    }
+
+    private void cargarTemporadasReales() {
+        apiService.getAvailableSeasons().enqueue(new Callback<java.util.List<String>>() {
+            @Override
+            public void onResponse(Call<java.util.List<String>> call, Response<java.util.List<String>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    java.util.List<String> temporadasReales = response.body();
+
+                    // Si la base de datos está vacía y no hay partidos aún
+                    if (temporadasReales.isEmpty()) {
+                        temporadasReales.add("Sin datos");
+                    }
+
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(TeamSeasonStatsActivity.this, android.R.layout.simple_spinner_dropdown_item, temporadasReales);
+                    spinnerSeason.setAdapter(adapter);
+
+                    // Nota: Al hacer 'setAdapter', Android seleccionará automáticamente
+                    // el primer año de la lista y disparará 'pedirEstadisticasADjango' por ti.
+                }
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) { }
+            public void onFailure(Call<java.util.List<String>> call, Throwable t) {
+                Toast.makeText(TeamSeasonStatsActivity.this, "Error cargando temporadas", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
@@ -75,46 +103,56 @@ public class TeamSeasonStatsActivity extends AppCompatActivity {
 
                         java.util.List<com.example.diamondata.adapter.SeasonStatsAdapter.SeasonItem> listaItems = new java.util.ArrayList<>();
 
-                        // 1. Procesamos los Bateadores
+                        // 1. Procesamos los Bateadores de forma segura (usando optString)
                         if (fielders.length() > 0) {
                             listaItems.add(new com.example.diamondata.adapter.SeasonStatsAdapter.SeasonItem("⚾ BATEADORES", ""));
                             for(int i = 0; i < fielders.length(); i++) {
                                 org.json.JSONObject f = fielders.getJSONObject(i);
-                                String nombre = f.getString("player__name") + " #" + f.getString("player__number");
-                                // OptString evita errores si la suma dio nulo
+
+                                // optString evita que la app crashee si el número o nombre es null
+                                String nombre = f.optString("player__name", "Jugador") + " #" + f.optString("player__number", "?");
                                 String stats = "H: " + f.optString("total_h", "0") +
                                         " | C: " + f.optString("total_c", "0") +
                                         " | HR: " + f.optString("total_h4", "0");
+
                                 listaItems.add(new com.example.diamondata.adapter.SeasonStatsAdapter.SeasonItem(nombre, stats));
                             }
                         }
 
-                        // 2. Procesamos los Lanzadores
+                        // 2. Procesamos los Lanzadores de forma segura
                         if (pitchers.length() > 0) {
                             listaItems.add(new com.example.diamondata.adapter.SeasonStatsAdapter.SeasonItem("🔥 LANZADORES", ""));
                             for(int i = 0; i < pitchers.length(); i++) {
                                 org.json.JSONObject p = pitchers.getJSONObject(i);
-                                String nombre = p.getString("player__name") + " #" + p.getString("player__number");
+
+                                String nombre = p.optString("player__name", "Jugador") + " #" + p.optString("player__number", "?");
                                 String stats = "G: " + p.optString("total_g", "0") +
                                         " | P: " + p.optString("total_p", "0") +
                                         " | SO: " + p.optString("total_so", "0") +
                                         " | SV: " + p.optString("total_sv", "0");
+
                                 listaItems.add(new com.example.diamondata.adapter.SeasonStatsAdapter.SeasonItem(nombre, stats));
                             }
                         }
 
-                        // ¡Pintamos la lista en pantalla!
+                        // Si no hay datos de nada en este año, mostramos un aviso en la lista
+                        if (listaItems.isEmpty()) {
+                            listaItems.add(new com.example.diamondata.adapter.SeasonStatsAdapter.SeasonItem("No hay estadísticas registradas", ""));
+                        }
+
+                        // Pintamos la lista
                         rvSeasonStats.setAdapter(new com.example.diamondata.adapter.SeasonStatsAdapter(listaItems));
 
                     } catch (Exception e) {
                         e.printStackTrace();
-                        Toast.makeText(TeamSeasonStatsActivity.this, "Error leyendo datos", Toast.LENGTH_SHORT).show();
+                        String errorReal = e.toString();
+                        Toast.makeText(TeamSeasonStatsActivity.this, "Error real: " + errorReal, Toast.LENGTH_LONG).show();
                     }
                 }
             }
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Toast.makeText(TeamSeasonStatsActivity.this, "Error de conexión", Toast.LENGTH_SHORT).show();
+                Toast.makeText(TeamSeasonStatsActivity.this, "Error de red", Toast.LENGTH_SHORT).show();
             }
         });
     }
