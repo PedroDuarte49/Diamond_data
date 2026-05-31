@@ -92,43 +92,39 @@
             app:cardCornerRadius="24dp"
             app:cardElevation="0dp"
             app:strokeWidth="2dp"
-            app:strokeColor="@color/accent_orange" >
+            app:strokeColor="#4A5568" > <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="24dp">
 
-            <RelativeLayout
-                android:layout_width="match_parent"
+            <ImageView
+                android:id="@+id/imgYo"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@android:drawable/ic_secure"
+                app:tint="#A0AEC0" /> <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/imgYo"
+            android:layout_marginStart="20dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="24dp">
+                android:text="Mi Perfil"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#A0AEC0" />
 
-                <ImageView
-                    android:id="@+id/imgYo"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@drawable/ic_person"
-                    app:tint="@color/accent_orange" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_toEndOf="@id/imgYo"
-                    android:layout_marginStart="20dp"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Mi Perfil"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/text_primary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Tus estadísticas personales"
-                        android:textSize="13sp"
-                        android:textColor="@color/text_secondary" />
-                </LinearLayout>
-            </RelativeLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="En actualizaciones futuras"
+                android:textSize="13sp"
+                android:textColor="#718096" />
+        </LinearLayout>
+        </RelativeLayout>
         </com.google.android.material.card.MaterialCardView>
 
         <!-- Card TEMPORADAS -->

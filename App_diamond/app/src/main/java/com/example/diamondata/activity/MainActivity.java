@@ -27,8 +27,6 @@ public class MainActivity extends AppCompatActivity {
 
         // 3. Configurar el click para "Mi Perfil"
         cardYo.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, MyProfileActivity.class);
-            startActivity(intent);
         });
 
         // 4. Configurar el click para "Histórico/Temporadas"
